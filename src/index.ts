@@ -101,5 +101,5 @@ export function createTuner(config: TunerConfig = {}) {
     stream.removeTrack(stream.getAudioTracks()[0])
   }
 
-  return { start, stop, context, analyser, processor, detector, config }
+  return { start, stop, context, analyser, processor, detector, config, getNote }
 }
