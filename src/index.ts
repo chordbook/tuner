@@ -51,11 +51,11 @@ export function createTuner(config: TunerConfig = {}) {
 
   const highpass = context.createBiquadFilter();
   highpass.type = "highpass";
-  highpass.frequency.value = config.maxFrequency!;
+  highpass.frequency.value = config.minFrequency!;
 
   const lowpass = context.createBiquadFilter();
   lowpass.type = "lowpass";
-  lowpass.frequency.value = config.minFrequency!;
+  lowpass.frequency.value = config.maxFrequency!;
 
   const pipeline: AudioNode[] = [
     lowpass,
