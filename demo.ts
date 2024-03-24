@@ -41,11 +41,3 @@ function visualize() {
 }
 
 visualize();
-
-
-// const oscillator = tuner.context.createOscillator();
-
-// oscillator.type = "square";
-// oscillator.frequency.setValueAtTime(440, tuner.context.currentTime); // value in hertz
-// oscillator.connect(tuner.context.destination);
-// oscillator.start();
