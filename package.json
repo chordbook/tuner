@@ -1,0 +1,48 @@
+{
+  "name": "@chordbook/tuner",
+  "version": "0.0.1",
+  "license": "GPL-3.0",
+  "type": "module",
+  "description": "The tuner used by ChordBook.app",
+  "module": "dist/index.js",
+  "main": "dist/index.cjs",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite",
+    "prepare": "tsup src/index.ts --format esm,cjs --minify --dts --sourcemap",
+    "build": "vite build --outDir demo",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chordbook/tuner.git"
+  },
+  "keywords": [
+    "guitar",
+    "ukulele",
+    "tuner"
+  ],
+  "author": "Brandon Keepers",
+  "bugs": {
+    "url": "https://github.com/chordbook/tuner/issues"
+  },
+  "homepage": "https://github.com/chordbook/tuner#readme",
+  "engines": {
+    "node": ">=16"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.2",
+    "vite": "^5.1.6",
+    "vitest": "^1.4.0"
+  },
+  "dependencies": {
+    "pitchy": "^4.1.0"
+  }
+}
