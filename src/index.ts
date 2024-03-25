@@ -63,11 +63,12 @@ export function createTuner(config: TunerConfig = {}) {
   }
 
   function process() {
+    const { clarityThreshold, minFrequency, maxFrequency, onNote } = config
     analyser.getFloatTimeDomainData(inputBuffer);
     const [frequency, clarity] = detector.findPitch(inputBuffer, context.sampleRate)
 
-    if (clarity > config.clarityThreshold!) {
-      config.onNote?.(getNote(frequency, clarity))
+    if (clarity > clarityThreshold! && frequency > minFrequency! && frequency < maxFrequency!) {
+      onNote?.(getNote(frequency, clarity))
     }
   }
 
