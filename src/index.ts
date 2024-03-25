@@ -11,6 +11,7 @@ export interface TunerConfig {
   smoothingTimeConstant?: number
   minFrequency?: number
   maxFrequency?: number
+  updateInterval?: number
   onNote?: (note: Note) => void
 }
 
@@ -22,6 +23,7 @@ export const TunerDefaults: TunerConfig = {
   smoothingTimeConstant: 0.9,
   minFrequency: 73.42, // D2
   maxFrequency: 1084.0, // C6, highest note on the guitar in front of me
+  updateInterval: 100,
 }
 
 export interface Note {
@@ -36,51 +38,31 @@ export interface Note {
 export function createTuner(config: TunerConfig = {}) {
   config = { ...TunerDefaults, ...config }
 
-  const detector = PitchDetector.forFloat32Array(config.bufferSize!)
-  detector.minVolumeDecibels = config.minVolumeDecibels!;
-
   const context = new AudioContext()
+  const highpass = new BiquadFilterNode(context, { type: "highpass", frequency: config.minFrequency })
+  const lowpass = new BiquadFilterNode(context, { type: "lowpass", frequency: config.maxFrequency })
+  const analyser = new AnalyserNode(context, { fftSize: config.bufferSize, smoothingTimeConstant: config.smoothingTimeConstant })
+  lowpass.connect(highpass).connect(analyser)
 
-  const processor = context.createScriptProcessor(config.bufferSize, 1, 1)
-  processor.addEventListener('audioprocess', process)
-
-  const analyser = new AnalyserNode(context, {
-    fftSize: config.bufferSize,
-    smoothingTimeConstant: config.smoothingTimeConstant
-  })
-
-  const highpass = context.createBiquadFilter();
-  highpass.type = "highpass";
-  highpass.frequency.value = config.minFrequency!;
-
-  const lowpass = context.createBiquadFilter();
-  lowpass.type = "lowpass";
-  lowpass.frequency.value = config.maxFrequency!;
-
-  const pipeline: AudioNode[] = [
-    lowpass,
-    highpass,
-    analyser,
-    processor,
-    context.destination
-  ]
-
-  for (var i = 0; i < pipeline.length - 1; i++) {
-    pipeline[i].connect(pipeline[i + 1])
-  }
+  const detector = PitchDetector.forFloat32Array(analyser.fftSize)
+  detector.minVolumeDecibels = config.minVolumeDecibels!;
+  const inputBuffer = new Float32Array(detector.inputLength)
 
   let stream: MediaStream
   let source: MediaStreamAudioSourceNode
+  let interval = 0;
 
   async function start () {
     stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     source = context.createMediaStreamSource(stream)
-    source.connect(pipeline[0])
+    source.connect(lowpass)
+
+    interval = setInterval(process, config.updateInterval!)
   }
 
-  function process(event: AudioProcessingEvent) {
-    const data = event.inputBuffer.getChannelData(0)
-    const [frequency, clarity] = detector.findPitch(data, context.sampleRate)
+  function process() {
+    analyser.getFloatTimeDomainData(inputBuffer);
+    const [frequency, clarity] = detector.findPitch(inputBuffer, context.sampleRate)
 
     if (clarity > config.clarityThreshold!) {
       config.onNote?.(getNote(frequency, clarity))
@@ -97,9 +79,10 @@ export function createTuner(config: TunerConfig = {}) {
   }
 
   async function stop() {
+    clearInterval(interval)
     stream.getTracks().forEach(track => track.stop())
     stream.removeTrack(stream.getAudioTracks()[0])
   }
 
-  return { start, stop, context, analyser, processor, detector, config, getNote }
+  return { start, stop, context, analyser, detector, config, getNote }
 }
