@@ -30,26 +30,33 @@ const tuner = createTuner({
   // Here are some other settings you can fiddle with and their default values.
   // (let us know if you find values that work better).
 
+  // The number of milliseconds between each pitch detection.
+  updateInterval: 50,
+
   // The frequency of middle A. Defaults to 440Hz.
   a4: 440,
 
   // The minimum clarity threshold. Anything below this will be ignored
-  clarityThreshold: 0.95,
+  clarityThreshold: 0.9,
 
-  // The minimum volume threshold. -100 means 1/100th the volume of the loudest sound.
-  minVolumeDecibels: -100,
+  // The minimum volume threshold. -1000 means 1/1000th the volume of the loudest sound.
+  minVolumeDecibels: -1000,
 
   // The minimum and maximum frequencies to detect. To reduce noise, everything else is
   // filtered out using a lowpass and highpass filter.
-  minFrequency: 73.42, // D2, drop D
-  maxFrequency: 1084.0, // C6, highest note on the guitar in front of me
+  minFrequency: 27.5, // A0, Lowest note on a piano
+  maxFrequency: 4186.01, // C8, Highest note on a piano
+
+  // The sample rate to use for the audio context.
+  // https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/sampleRate
+  sampleRate: 44100,
 
   // The size of buffer to use for frequency analysis, which maps to the `fftSize`:
   // https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode/fftSize
-  bufferSize: 2048,
+  bufferSize: 8192,
 
   // https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode/smoothingTimeConstant
-  smoothingTimeConstant: 0.9,
+  smoothingTimeConstant: 0.8
 })
 
 // Request access to the microphone and begin pitch detection

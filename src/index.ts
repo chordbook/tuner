@@ -12,18 +12,20 @@ export interface TunerConfig {
   minFrequency?: number
   maxFrequency?: number
   updateInterval?: number
+  sampleRate?: number
   onNote?: (note: Note) => void
 }
 
 export const TunerDefaults: TunerConfig = {
   a4: 440,
-  clarityThreshold: 0.95,
-  minVolumeDecibels: -100,
-  bufferSize: 2048,
-  smoothingTimeConstant: 0.9,
-  minFrequency: 73.42, // D2
-  maxFrequency: 1084.0, // C6, highest note on the guitar in front of me
-  updateInterval: 100,
+  clarityThreshold: 0.9,
+  minVolumeDecibels: -1000,
+  bufferSize: 8192,
+  smoothingTimeConstant: 0.8,
+  minFrequency: 27.5, // A0, Lowest note on a piano
+  maxFrequency: 4186.01, // C8, Highest note on a piano
+  updateInterval: 50,
+  sampleRate: 44100, // Seems to work better than 48000 for some reason
 }
 
 export interface Note {
@@ -38,7 +40,7 @@ export interface Note {
 export function createTuner(config: TunerConfig = {}) {
   config = { ...TunerDefaults, ...config }
 
-  const context = new AudioContext()
+  const context = new AudioContext({ sampleRate: config.sampleRate })
   const highpass = new BiquadFilterNode(context, { type: "highpass", frequency: config.minFrequency })
   const lowpass = new BiquadFilterNode(context, { type: "lowpass", frequency: config.maxFrequency })
   const analyser = new AnalyserNode(context, { fftSize: config.bufferSize, smoothingTimeConstant: config.smoothingTimeConstant })
